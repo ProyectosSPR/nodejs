@@ -3,12 +3,14 @@ import path from "path";
 import morgan from "morgan";
 import routes from "./routes/index.js";
 import bodyParser from "body-parser";
+import request from "request";
 
 
 import config from "./config.js";
 import {fileURLToPath} from "url";
 
 const app = express();
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Settings
@@ -35,6 +37,17 @@ app.post('/webhook', (req, res) => {
         body.entry.forEach(entry=> {
             const webhookEvent = entry.messaging[0];
             console.log(webhookEvent);
+            // Handle the message event
+            const sender_psid = webhookEvent.sender.id;
+            console.log(`sender PSID: ${sender_psid}`);
+
+            //validar que se recibe mensajes
+            if (webhookEvent.message) {
+              HandleMessage(sender_psid,webhookEvent.message);
+            }else if (webhookEvent.postback) {
+              HandlePostback(sender_psid,webhookEvent.postback);
+              
+            }
         });
         res.status(200).send('Evento recibido');
     } else {
@@ -56,6 +69,49 @@ app.get('/webhook', (req, res) => {
       }
   }
 });
+
+//Funciones para manipular chats
+
+function HandleMessage(sender_psid,received_message) {
+  let response;
+  if (received_message.text) {
+  response = {
+    'text' : `tu mensaje fue ${received_message.text} : )`
+    } ;
+
+  }
+  callSendAPI(sender_psid,response);
+}
+function HandlePostback(sender_psid,received_postback) {
+  
+}
+
+function callSendAPI(sender_psid,response) {
+  const requestBody = {
+    'recipient' : {
+      'id' : sender_psid
+    },
+    'message': response
+  };
+    request({
+      'uri':'https://graph.facebook.com/v2.6/me/messages',
+      'qs': {'access_token': PAGE_ACCESS_TOKEN},
+      'method': 'POST',
+      'json': requestBody
+      
+    },(err,res,body)=>{
+      if(!err){
+        console.log("mensaje enviado");
+      }else{
+        console.error("Error al enviar el mensaje", err);
+      }
+    });
+}
+
+
+
+//fin--------------------------
+
 // Routes
 app.use(routes);
 
