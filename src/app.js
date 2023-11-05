@@ -4,6 +4,7 @@ import morgan from "morgan";
 import routes from "./routes/index.js";
 import bodyParser from "body-parser";
 import request from "request";
+import OpenAI from "openai";
 
 
 import config from "./config.js";
@@ -11,6 +12,8 @@ import {fileURLToPath} from "url";
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Settings
@@ -71,6 +74,12 @@ app.get('/webhook', (req, res) => {
 });
 
 //Funciones para manipular chats
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY,
+});
+
+
+
 
 function HandleMessage(sender_psid,received_message) {
   let response;
