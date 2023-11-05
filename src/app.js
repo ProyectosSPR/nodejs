@@ -74,9 +74,7 @@ app.get('/webhook', (req, res) => {
 });
 
 //Funciones para manipular chats
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
+
 
 
 
@@ -85,7 +83,7 @@ function HandleMessage(sender_psid,received_message) {
   let response;
   if (received_message.text) {
   response = {
-    'text' : `tu mensaje fue YA FREGAMOS ${received_message.text} : )`
+    'text' : `tu mensaje fue YA FREGAMOS ${received_message.text}`
     } ;
 
   }
